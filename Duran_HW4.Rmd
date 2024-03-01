@@ -1,0 +1,98 @@
+---
+title: "HW 4"
+output: github_document
+---
+My group members names is Chris Lacroix and Rosairi Estevez
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+load("~/Documents/izzy work/BRFSS2022_rev.RData")
+```
+```{r}
+library(ggplot2)
+library(tidyverse)
+```
+```{r}
+load("~/Documents/izzy work/BRFSS2022_rev.RData")
+brfss22$Age_midpt <- fct_recode(brfss22$X_AGEG5YR, "21" = "Age 18 to 24",
+                                "27" = "Age 25 to 29", "32" = "Age 30 to 34",
+                                "37" = "Age 35 to 39", "42" = "Age 40 to 44",
+                                "47" = "Age 45 to 49", "52" = "Age 50 to 54",
+                                "57" = "Age 55 to 59", "62" = "Age 60 to 64",
+                                "67" = "Age 65 to 69", "72" = "Age 70 to 74",
+                                "77" = "Age 75 to 79", "82" = "Age 80 or older",
+                                NULL = "Dont know/Refused/Missing")
+brfss22$Age_midpt <- as.numeric(levels(brfss22$Age_midpt))[brfss22$Age_midpt]
+```
+```{r}
+select_tristate <- (brfss22$X_STATE == "Florida") | (brfss22$X_STATE == "Washington") | (brfss22$X_STATE == "New York")
+brfss_tristate <- subset(brfss22,select_tristate)
+```
+```{r}
+p_tri <- ggplot(data = brfss_tristate,
+                mapping = aes(x = Age_midpt,
+                              y = X_BMI5))
+p_tri + geom_smooth()
+```
+```{r}
+p_tri + geom_jitter(width = 2.5, height = NULL, alpha = 0.05)
+```
+```{r}
+p_tri <- ggplot(data = brfss_tristate,
+                mapping = aes(x = Age_midpt,
+                              y = X_BMI5,
+                              color = X_STATE,
+                              fill = X_STATE))
+p_tri + geom_smooth()
+```
+```{r}
+ACEdidntask <- (as.numeric(is.na(brfss22$ACEDEPRS)) + 
+                        as.numeric(is.na(brfss22$ACEDRINK)) +
+                        as.numeric(is.na(brfss22$ACEDRUGS)) +
+                        as.numeric(is.na(brfss22$ACEPRISN)) +
+                        as.numeric(is.na(brfss22$ACEDIVRC)) +
+                        as.numeric(is.na(brfss22$ACEPUNCH)) +
+                        as.numeric(is.na(brfss22$ACEHURT1)) +
+                        as.numeric(is.na(brfss22$ACESWEAR)) +
+                        as.numeric(is.na(brfss22$ACETOUCH)) )
+select_ACE <- (ACEdidntask == 0) # with zero missing values for any of ACE questions
+brfss_ACE <- subset(brfss22, select_ACE)
+```
+```{r}
+xtabs(~ brfss_ACE$ACEPRISN + brfss_ACE$ACEDRUGS)
+```
+```{r}
+brfss_ACE$ACEPRISN_recode <- fct_recode(brfss_ACE$ACEPRISN, 
+                                        " " = "Yes, Adverse Childhood Exper, lived with someone who served time or was sentenced to serve time in a prison, jail, or other correctional facility",
+                                " " = "No", 
+                                " " = "dont know not sure",
+                                " " = "refused"
+)
+
+# might want to set some values as missing,
+#                                 NULL = "dont know not sure"
+```
+```{r}
+ACEdidntask <- (as.numeric(is.na(brfss22$ACEDEPRS)) + 
+                        as.numeric(is.na(brfss22$ACEDRINK)) +
+                        as.numeric(is.na(brfss22$ACEDRUGS)) +
+                        as.numeric(is.na(brfss22$ACEPRISN)) +
+                        as.numeric(is.na(brfss22$ACEDIVRC)) +
+                        as.numeric(is.na(brfss22$ACEPUNCH)) +
+                        as.numeric(is.na(brfss22$ACEHURT1)) +
+                        as.numeric(is.na(brfss22$ACESWEAR)) +
+                        as.numeric(is.na(brfss22$ACETOUCH)) )
+select_ACE <- (ACEdidntask == 0) # with zero missing values for any of ACE questions
+```
+```{r}
+summary(ACEdidntask)
+```
+```{r}
+quantile(ACEdidntask, probs = c(0.01,0.05,0.1,0.15,0.2))
+```
+```{r}
+summary(brfss22)
+summary(brfss_ACE)
+```
+
